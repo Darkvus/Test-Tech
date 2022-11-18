@@ -35,13 +35,15 @@ class AlbumsSerializer(serializers.ModelSerializer):
 class DataAlbumsSerializer(serializers.ModelSerializer):
     num_tracks = serializers.SerializerMethodField()
     artistid = ArtistsSerializer()
+    total_tracks = serializers.IntegerField()
     
     class Meta:
         model = Albums
         fields = [
             'title', 
             'num_tracks', 
-            'artistid', 
+            'artistid',
+            'total_tracks',
         ]
     
     def get_num_tracks(self, obj):
