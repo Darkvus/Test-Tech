@@ -30,3 +30,19 @@ class AlbumsSerializer(serializers.ModelSerializer):
             'title', 
             'tracks_set', 
         ]
+
+
+class DataAlbumsSerializer(serializers.ModelSerializer):
+    num_tracks = serializers.SerializerMethodField()
+    artistid = ArtistsSerializer()
+    
+    class Meta:
+        model = Albums
+        fields = [
+            'title', 
+            'num_tracks', 
+            'artistid', 
+        ]
+    
+    def get_num_tracks(self, obj):
+        return obj.tracks_set.count()

@@ -9,7 +9,7 @@ from drf_spectacular.types import OpenApiTypes
 
 
 from api.models import Artists, Albums
-from api.serializers import ArtistsSerializer, AlbumsSerializer
+from api.serializers import ArtistsSerializer, AlbumsSerializer, DataAlbumsSerializer
 
 class ApiViewSet(GenericViewSet):
     """
@@ -27,7 +27,7 @@ class ApiViewSet(GenericViewSet):
     def get_queryset(self):
         if self.action == 'get_all_artists':
             return Artists.objects.all()
-        elif self.action == 'get_all_albums':
+        elif self.action in ['get_all_albums', 'get_all_albums_with_data']:
             return Albums.objects.all()
         return None
     
@@ -36,6 +36,8 @@ class ApiViewSet(GenericViewSet):
             return ArtistsSerializer
         elif self.action == 'get_all_albums':
             return AlbumsSerializer
+        elif self.action == 'get_all_albums_with_data':
+            return DataAlbumsSerializer
         return super().get_serializer_class()
 
     def generic_list(self, queryset, pagination=False):
@@ -65,5 +67,15 @@ class ApiViewSet(GenericViewSet):
     )    
     @action(detail=False, methods=['get'], url_path='all-albums')
     def get_all_albums(self, request, *args, **kwargs):
+        pagination = True if self.request.query_params.get('pagination', "false") == "true" else False
+        return self.generic_list(self.get_queryset(), pagination)
+    
+    @extend_schema(
+        parameters=[
+          OpenApiParameter(name="pagination", type=OpenApiTypes.BOOL, location=OpenApiParameter.QUERY, required=False, description="Filtro de paginacion"),
+        ],
+    )
+    @action(detail=False, methods=['get'], url_path='data-albums')
+    def get_all_albums_with_data(self, request, *args, **kwargs):
         pagination = True if self.request.query_params.get('pagination', "false") == "true" else False
         return self.generic_list(self.get_queryset(), pagination)
